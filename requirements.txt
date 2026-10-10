@@ -4,3 +4,5 @@ pydantic-settings>=2.3
 sqlalchemy>=2.0
 psycopg[binary]>=3.2
 alembic>=1.13
+pydantic[email]>=2.7
+pwdlib[argon2]>=0.2
