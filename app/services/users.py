@@ -2,7 +2,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.core.security import hash_password
+from app.core.security import hash_password, DUMMY_HASH, verify_password
 from app.models.user import User
 
 class EmailAlreadyRegisteredError(Exception):
@@ -10,6 +10,9 @@ class EmailAlreadyRegisteredError(Exception):
 
 def get_user_by_email(db: Session, email: str) -> User | None:
     return db.scalar(select(User).where(User.email == email.lower()))
+
+def get_user_by_id(db: Session, user_id: int) -> User | None:
+    return db.get(User, user_id)
 
 def create_user(
         db: Session, email: str, password: str, display_name: str | None = None
@@ -31,4 +34,13 @@ def create_user(
         db.rollback()
         raise EmailAlreadyRegisteredError
     db.refresh(user)
+    return user
+
+def authenticate_user(db: Session, email: str, password: str) -> User | None:
+    user = get_user_by_email(db, email)
+
+    # Always do one hash verification, even for unknown emails
+    password_ok = verify_password(password, user.hashed_password if user else DUMMY_HASH)
+    if user is None or not password_ok:
+        return None
     return user
