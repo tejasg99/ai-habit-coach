@@ -44,3 +44,7 @@ def authenticate_user(db: Session, email: str, password: str) -> User | None:
     if user is None or not password_ok:
         return None
     return user
+
+def delete_user(db: Session, user: User) -> None:
+    db.delete(user)
+    db.commit()
