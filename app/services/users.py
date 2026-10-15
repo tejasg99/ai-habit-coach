@@ -45,6 +45,13 @@ def authenticate_user(db: Session, email: str, password: str) -> User | None:
         return None
     return user
 
+def update_user(db: Session, user: User, changes: dict) -> User:
+    for field, value in changes.items():
+        setattr(user, field, value)
+    db.commit()
+    db.refresh(user)
+    return user
+
 def delete_user(db: Session, user: User) -> None:
     db.delete(user)
     db.commit()
