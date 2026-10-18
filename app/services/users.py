@@ -2,22 +2,24 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from app.core.security import hash_password, DUMMY_HASH, verify_password
+from app.core.security import DUMMY_HASH, hash_password, verify_password
 from app.models.user import User
+
 
 class EmailAlreadyRegisteredError(Exception):
     pass
 
+
 def get_user_by_email(db: Session, email: str) -> User | None:
     return db.scalar(select(User).where(User.email == email.lower()))
+
 
 def get_user_by_id(db: Session, user_id: int) -> User | None:
     return db.get(User, user_id)
 
-def create_user(
-        db: Session, email: str, password: str, display_name: str | None = None
-) -> User:
-    if get_user_by_email(db, email): 
+
+def create_user(db: Session, email: str, password: str, display_name: str | None = None) -> User:
+    if get_user_by_email(db, email):
         raise EmailAlreadyRegisteredError
 
     user = User(
@@ -36,6 +38,7 @@ def create_user(
     db.refresh(user)
     return user
 
+
 def authenticate_user(db: Session, email: str, password: str) -> User | None:
     user = get_user_by_email(db, email)
 
@@ -45,12 +48,14 @@ def authenticate_user(db: Session, email: str, password: str) -> User | None:
         return None
     return user
 
+
 def update_user(db: Session, user: User, changes: dict) -> User:
     for field, value in changes.items():
         setattr(user, field, value)
     db.commit()
     db.refresh(user)
     return user
+
 
 def delete_user(db: Session, user: User) -> None:
     db.delete(user)

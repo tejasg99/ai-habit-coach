@@ -6,6 +6,7 @@ from pydantic import AfterValidator, BaseModel, ConfigDict, Field
 
 from app.models.enums import DietaryPref, FitnessLevel, Goal
 
+
 def _validate_timezone(value: str) -> str:
     try:
         ZoneInfo(value)
@@ -13,15 +14,18 @@ def _validate_timezone(value: str) -> str:
         raise ValueError("Must be a valid IANA timezone, e.g. 'Asia/kolkata'")
     return value
 
+
 def _clean_equipment(items: list[str]) -> list[str]:
     cleaned = {item.strip().lower() for item in items if item.strip()}
     if any(len(item) > 50 for item in cleaned):
         raise ValueError("Equipment names must be 50 character or fewer")
     return sorted(cleaned)
 
+
 # Reusable field types: validation rules defined once, used in several schemas.
 Timezone = Annotated[str, AfterValidator(_validate_timezone)]
 Equipment = Annotated[list[str], Field(max_length=20), AfterValidator(_clean_equipment)]
+
 
 class ProfileIn(BaseModel):
     """Full profile: used by PUT(create or replace)"""
@@ -31,7 +35,8 @@ class ProfileIn(BaseModel):
     dietary_pref: DietaryPref
     equipment: Equipment = Field(default_factory=list)
     timezone: Timezone = "UTC"
-    reminder_time: time = time(20, 0) #in the user's local time
+    reminder_time: time = time(20, 0)  # in the user's local time
+
 
 class ProfileUpdate(BaseModel):
     """Partial profile: used by PATCH. Every field is optional."""
@@ -42,6 +47,7 @@ class ProfileUpdate(BaseModel):
     equipment: Equipment | None = None
     timezone: Timezone | None = None
     reminder_time: time | None = None
+
 
 class ProfileRead(ProfileIn):
     model_config = ConfigDict(from_attributes=True)

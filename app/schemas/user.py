@@ -1,6 +1,9 @@
 from datetime import datetime
+
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
+
 from app.schemas.fields import DisplayName
+
 
 # Input contract
 class UserCreate(BaseModel):
@@ -8,10 +11,12 @@ class UserCreate(BaseModel):
     password: str = Field(min_length=8, max_length=128)
     display_name: DisplayName = None
 
+
 # Update display_name
 class UserUpdate(BaseModel):
     model_config = ConfigDict(extra="forbid")
     display_name: DisplayName = None
+
 
 # Output contract
 class UserRead(BaseModel):

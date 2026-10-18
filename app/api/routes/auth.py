@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, HTTPException, status, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 
 from app.core.security import (
@@ -8,9 +8,8 @@ from app.core.security import (
     TokenError,
     create_access_token,
     create_refresh_token,
-    decode_token
+    decode_token,
 )
-
 from app.db.session import DbSession
 from app.schemas.token import RefreshRequest, TokenPair
 from app.schemas.user import UserCreate, UserRead
@@ -18,10 +17,11 @@ from app.services.users import (
     EmailAlreadyRegisteredError,
     authenticate_user,
     create_user,
-    get_user_by_id
+    get_user_by_id,
 )
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+
 
 def _issue_tokens(user_id: int) -> TokenPair:
     return TokenPair(
@@ -37,6 +37,7 @@ def signup(payload: UserCreate, db: DbSession):
     except EmailAlreadyRegisteredError:
         raise HTTPException(status.HTTP_409_CONFLICT, "Email already registered")
 
+
 @router.post("/login", response_model=TokenPair)
 def login(form: Annotated[OAuth2PasswordRequestForm, Depends()], db: DbSession):
     user = authenticate_user(db, form.username, form.password)
@@ -44,9 +45,10 @@ def login(form: Annotated[OAuth2PasswordRequestForm, Depends()], db: DbSession):
         raise HTTPException(
             status.HTTP_401_UNAUTHORIZED,
             "Incorrect email or password",
-            headers={"WWW-Authenticate": "Bearer"}
+            headers={"WWW-Authenticate": "Bearer"},
         )
     return _issue_tokens(user.id)
+
 
 @router.post("/refresh", response_model=TokenPair)
 def refresh(body: RefreshRequest, db: DbSession):

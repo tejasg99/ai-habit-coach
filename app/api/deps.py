@@ -10,6 +10,7 @@ from app.services.users import get_user_by_id
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
+
 def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db: DbSession) -> User:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -25,5 +26,6 @@ def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db: DbSessio
     if user is None:
         raise credentials_exception
     return user
+
 
 CurrentUser = Annotated[User, Depends(get_current_user)]

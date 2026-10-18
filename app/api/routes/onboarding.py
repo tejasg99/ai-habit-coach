@@ -12,6 +12,7 @@ from app.services.profiles import (
 
 router = APIRouter(prefix="/onboarding", tags=["onboarding"])
 
+
 @router.put("/me", response_model=ProfileRead)
 def save_my_profile(payload: ProfileIn, user: CurrentUser, db: DbSession):
     return save_profile(db, user.id, payload.model_dump())
@@ -24,6 +25,7 @@ def read_my_profile(user: CurrentUser, db: DbSession):
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Onboarding not completed")
     return profile
 
+
 @router.patch("/me", response_model=ProfileRead)
 def update_my_profile(payload: ProfileUpdate, user: CurrentUser, db: DbSession):
     changes = payload.model_dump(exclude_unset=True, exclude_none=True)
@@ -31,4 +33,3 @@ def update_my_profile(payload: ProfileUpdate, user: CurrentUser, db: DbSession):
         return update_profile(db, user.id, changes)
     except ProfileNotFoundError:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Onboarding not completed")
-
