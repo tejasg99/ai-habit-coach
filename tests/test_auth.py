@@ -1,3 +1,4 @@
+from app.core.config import settings
 from tests.helpers import bearer
 
 
@@ -38,7 +39,7 @@ def test_wrong_password_and_unknown_email_look_identical(client, register):
 
 
 def test_protected_route_required_token(client):
-    assert client.get("/user/me").status_code == 401
+    assert client.get("/users/me").status_code == 401
 
 
 def test_me_with_valid_token(client, register):
@@ -72,3 +73,14 @@ def test_refresh_token_cannot_authenticate_requests(client, register):
     tokens = register()
     res = client.get("/users/me", headers=bearer(tokens, "refresh_token"))
     assert res.status_code == 401
+
+def test_expired_access_token_is_rejected(client, register, monkeypatch):
+    monkeypatch.setattr(settings, "ACCESS_TOKEN_EXPIRE_MINUTES", -1) # tokens born already expired
+    tokens = register()
+    assert client.get("/users/me", headers=bearer(tokens)).status_code == 401
+
+    # The mobile app's recovery path: refresh, then retry.
+    monkeypatch.undo()  # new tokens get the normal 30-minute lifetime again
+    res = client.post("/auth/refresh", json={"refresh_token": tokens["refresh_token"]})
+    assert res.status_code == 200
+    assert client.get("/users/me", headers=bearer(res.json())).status_code == 200

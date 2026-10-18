@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from pydantic import BeforeValidator, Field
+from pydantic import BeforeValidator, StringConstraints
 
 
 def _blank_to_none(value):
@@ -11,4 +11,7 @@ def _blank_to_none(value):
 
 
 # BeforeValidator runs before max_length check so " " becomes None first
-DisplayName = Annotated[str | None, BeforeValidator(_blank_to_none), Field(max_length=100)]
+DisplayName = Annotated[
+    Annotated[str, StringConstraints(max_length=100)] | None,
+    BeforeValidator(_blank_to_none)
+]

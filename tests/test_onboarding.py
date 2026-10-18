@@ -69,3 +69,10 @@ def test_users_cannot_see_each_others_profiles(client, register):
     client.put("/onboarding/me", json=PROFILE, headers=alice)
     assert client.get("/onboarding/me", headers=bob).status_code == 404
     assert client.get("/onboarding/me", headers=alice).status_code == 200
+
+def test_equipment_limit_boundary(client, register):
+    headers = bearer(register())
+    twenty = [f"item{i}" for i in range(20)]
+    assert client.put("/onboarding/me", json={**PROFILE, "equipment": twenty}, headers=headers).status_code == 200
+    twenty_one = [f"item{i}" for i in range(21)]
+    assert client.put("/onboarding/me", json={**PROFILE, "equipment": twenty_one}, headers=headers).status_code == 422
