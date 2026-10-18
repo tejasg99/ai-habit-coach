@@ -12,6 +12,5 @@ def _blank_to_none(value):
 
 # BeforeValidator runs before max_length check so " " becomes None first
 DisplayName = Annotated[
-    Annotated[str, StringConstraints(max_length=100)] | None,
-    BeforeValidator(_blank_to_none)
+    Annotated[str, StringConstraints(max_length=100)] | None, BeforeValidator(_blank_to_none)
 ]

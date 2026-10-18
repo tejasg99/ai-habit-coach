@@ -74,8 +74,9 @@ def test_refresh_token_cannot_authenticate_requests(client, register):
     res = client.get("/users/me", headers=bearer(tokens, "refresh_token"))
     assert res.status_code == 401
 
+
 def test_expired_access_token_is_rejected(client, register, monkeypatch):
-    monkeypatch.setattr(settings, "ACCESS_TOKEN_EXPIRE_MINUTES", -1) # tokens born already expired
+    monkeypatch.setattr(settings, "ACCESS_TOKEN_EXPIRE_MINUTES", -1)  # tokens born already expired
     tokens = register()
     assert client.get("/users/me", headers=bearer(tokens)).status_code == 401
 
