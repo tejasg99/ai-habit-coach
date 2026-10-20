@@ -7,6 +7,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base
 
 if TYPE_CHECKING:
+    from app.models.plan import Plan
     from app.models.profile import Profile
 
 
@@ -25,3 +26,5 @@ class User(Base):
     profile: Mapped[Optional["Profile"]] = relationship(
         back_populates="user", cascade="all, delete-orphan", uselist=False
     )
+
+    plans: Mapped[list["Plan"]] = relationship(back_populates="user", cascade="all, delete-orphan")
