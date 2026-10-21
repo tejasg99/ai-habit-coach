@@ -8,6 +8,7 @@ from app.db.base import Base
 from app.models.enums import PlanItemType, PlanStatus, enum_column
 from app.models.user import User
 
+
 class Plan(Base):
     __tablename__ = "plans"
     __table_args__ = (
@@ -39,6 +40,7 @@ class Plan(Base):
         cascade="all, delete-orphan",
         order_by="PlanItem.day_of_week, PlanItem.position",
     )
+
 
 class PlanItem(Base):
     __tablename__ = "plan_items"

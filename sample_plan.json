@@ -1,0 +1,231 @@
+{
+    "days": [
+        {
+            "day": "monday",
+            "items": [
+                {
+                    "type": "workout",
+                    "title": "Full-Body Strength A",
+                    "description": "Warm up with 5 minutes of marching and arm circles. Perform dumbbell goblet squats, dumbbell floor presses, resistance-band rows, and glute bridges with controlled movements.",
+                    "target_metric": "2 sets x 8-12 reps per exercise"
+                },
+                {
+                    "type": "workout",
+                    "title": "Core Stability",
+                    "description": "Perform dead bugs and bird dogs slowly, keeping your back comfortable and your movements controlled.",
+                    "target_metric": "2 sets x 8 reps per side"
+                },
+                {
+                    "type": "meal",
+                    "title": "Protein-Rich Breakfast",
+                    "description": "Eat vegetable besan chilla with curd, or oats with milk, nuts, and seeds to start the day with a balanced vegetarian meal.",
+                    "target_metric": null
+                },
+                {
+                    "type": "meal",
+                    "title": "Balanced Lunch",
+                    "description": "Have dal or rajma with rice or roti, a serving of vegetables, and curd or paneer for additional protein.",
+                    "target_metric": null
+                },
+                {
+                    "type": "habit",
+                    "title": "Post-Workout Recovery",
+                    "description": "Cool down with gentle stretches and take a short walk if comfortable. Drink water throughout the day and aim for a consistent bedtime.",
+                    "target_metric": "5-10 min cooldown"
+                }
+            ]
+        },
+        {
+            "day": "tuesday",
+            "items": [
+                {
+                    "type": "workout",
+                    "title": "Light Cardio and Mobility",
+                    "description": "Walk at a comfortable pace, then perform shoulder circles, hip circles, cat-cow movements, and gentle hamstring stretches. Keep the session easy enough to recover from Monday's workout.",
+                    "target_metric": "20 min walk + 5 min mobility"
+                },
+                {
+                    "type": "meal",
+                    "title": "Protein-Packed Snack",
+                    "description": "Choose roasted chana, a glass of milk, or plain yogurt with nuts as a convenient vegetarian snack.",
+                    "target_metric": null
+                },
+                {
+                    "type": "meal",
+                    "title": "Paneer or Tofu Dinner",
+                    "description": "Prepare paneer or tofu with mixed vegetables and serve it with roti or rice. Include a variety of vegetables for a balanced meal.",
+                    "target_metric": null
+                },
+                {
+                    "type": "habit",
+                    "title": "Hydration Routine",
+                    "description": "Keep a water bottle nearby and drink regularly throughout the day, especially around exercise and in hot weather.",
+                    "target_metric": "Drink water regularly"
+                }
+            ]
+        },
+        {
+            "day": "wednesday",
+            "items": [
+                {
+                    "type": "workout",
+                    "title": "Full-Body Strength B",
+                    "description": "Warm up for 5 minutes, then perform dumbbell Romanian deadlifts, supported one-arm dumbbell rows, standing dumbbell shoulder presses, and bodyweight squats. Use light weights and stop each set before your form deteriorates.",
+                    "target_metric": "2 sets x 8-12 reps per exercise"
+                },
+                {
+                    "type": "workout",
+                    "title": "Upper-Body Band Work",
+                    "description": "Perform resistance-band pull-aparts and biceps curls with smooth, controlled movements. Choose a band that lets you complete every repetition without straining.",
+                    "target_metric": "2 sets x 10-12 reps per exercise"
+                },
+                {
+                    "type": "meal",
+                    "title": "Balanced Breakfast",
+                    "description": "Have moong dal chilla with paneer filling or whole-grain toast with peanut butter and a glass of milk.",
+                    "target_metric": null
+                },
+                {
+                    "type": "meal",
+                    "title": "Protein-Rich Dinner",
+                    "description": "Serve chickpea curry or dal with rice or roti and a side of vegetables. Include curd if it suits your dietary preference.",
+                    "target_metric": null
+                },
+                {
+                    "type": "habit",
+                    "title": "Gentle Cooldown",
+                    "description": "Stretch your chest, shoulders, hips, and hamstrings gently after training. Breathe steadily and avoid bouncing during stretches.",
+                    "target_metric": "5-8 min"
+                }
+            ]
+        },
+        {
+            "day": "thursday",
+            "items": [
+                {
+                    "type": "workout",
+                    "title": "Active Recovery Walk",
+                    "description": "Take an easy outdoor walk and keep the pace conversational. If you feel tired, shorten the walk and prioritize recovery rather than adding extra exercise.",
+                    "target_metric": "20-30 min"
+                },
+                {
+                    "type": "workout",
+                    "title": "Gentle Mobility",
+                    "description": "Practice cat-cow, shoulder rolls, gentle hip-flexor stretches, and ankle circles. Move only through a comfortable range without forcing any position.",
+                    "target_metric": "8-10 min"
+                },
+                {
+                    "type": "meal",
+                    "title": "Vegetarian Protein Bowl",
+                    "description": "Combine cooked chickpeas or rajma, rice, chopped vegetables, and curd or tofu for a filling, balanced meal.",
+                    "target_metric": null
+                },
+                {
+                    "type": "habit",
+                    "title": "Sleep Consistency",
+                    "description": "Set a regular bedtime and reduce stimulating screen use before sleep. Allow enough time for approximately 7-9 hours of sleep.",
+                    "target_metric": "7-9 hours"
+                }
+            ]
+        },
+        {
+            "day": "friday",
+            "items": [
+                {
+                    "type": "workout",
+                    "title": "Full-Body Strength C",
+                    "description": "Warm up for 5 minutes, then perform dumbbell goblet squats, dumbbell floor presses, dumbbell Romanian deadlifts, and resistance-band rows. Use a manageable load and rest between sets.",
+                    "target_metric": "2 sets x 8-12 reps per exercise"
+                },
+                {
+                    "type": "workout",
+                    "title": "Glute and Core Finisher",
+                    "description": "Perform glute bridges and dead bugs with controlled breathing. Keep the effort moderate and skip any movement that causes discomfort.",
+                    "target_metric": "2 sets x 10-12 reps per exercise"
+                },
+                {
+                    "type": "meal",
+                    "title": "Muscle-Supporting Breakfast",
+                    "description": "Eat oats prepared with milk and nuts, or poha served with a side of curd and roasted chana.",
+                    "target_metric": null
+                },
+                {
+                    "type": "meal",
+                    "title": "Balanced Post-Workout Meal",
+                    "description": "Have tofu or paneer with rice or roti and vegetables after training, or choose dal with rice and curd. Eat a satisfying meal that fits your appetite.",
+                    "target_metric": null
+                },
+                {
+                    "type": "habit",
+                    "title": "Track Your Progress",
+                    "description": "Record the exercises, dumbbell weights, sets, and repetitions you completed. Aim to improve gradually while maintaining good technique.",
+                    "target_metric": "2-3 min log"
+                }
+            ]
+        },
+        {
+            "day": "saturday",
+            "items": [
+                {
+                    "type": "workout",
+                    "title": "Optional Light Activity",
+                    "description": "Choose a relaxed walk, easy cycling, or a recreational activity you enjoy. Keep the intensity low and skip the session if you need more recovery.",
+                    "target_metric": "15-30 min"
+                },
+                {
+                    "type": "meal",
+                    "title": "Protein-Rich Vegetarian Lunch",
+                    "description": "Prepare a meal with soy chunks, paneer, tofu, or lentils alongside rice or roti and seasonal vegetables.",
+                    "target_metric": null
+                },
+                {
+                    "type": "meal",
+                    "title": "Nutritious Snack",
+                    "description": "Choose milk, yogurt, roasted chickpeas, sprouts, or a small handful of nuts between meals according to your hunger.",
+                    "target_metric": null
+                },
+                {
+                    "type": "habit",
+                    "title": "Meal Preparation",
+                    "description": "Prepare a batch of dal, beans, boiled chickpeas, or chopped vegetables to make balanced vegetarian meals easier during the coming week.",
+                    "target_metric": "20-30 min"
+                }
+            ]
+        },
+        {
+            "day": "sunday",
+            "items": [
+                {
+                    "type": "workout",
+                    "title": "Rest and Recovery",
+                    "description": "Take a full rest day from strength training. Gentle walking and comfortable stretching are optional if they help you feel relaxed.",
+                    "target_metric": "Rest day"
+                },
+                {
+                    "type": "meal",
+                    "title": "Balanced Vegetarian Breakfast",
+                    "description": "Choose idli with sambar, vegetable upma with curd, or besan chilla with paneer. Include a protein source as part of your usual breakfast.",
+                    "target_metric": null
+                },
+                {
+                    "type": "meal",
+                    "title": "Wholesome Family Meal",
+                    "description": "Build your meal around dal, beans, tofu, paneer, or another vegetarian protein, with vegetables and rice or roti. Include different foods across the day for variety.",
+                    "target_metric": null
+                },
+                {
+                    "type": "habit",
+                    "title": "Weekly Reflection",
+                    "description": "Review your workout log, note which exercises felt comfortable, and prepare your equipment for the next week. Increase weights or repetitions only when your current routine feels manageable with good form.",
+                    "target_metric": "5-10 min"
+                },
+                {
+                    "type": "habit",
+                    "title": "Prepare for Quality Sleep",
+                    "description": "Keep your evening routine calm, avoid late caffeine if it affects your sleep, and aim for a consistent bedtime.",
+                    "target_metric": "7-9 hours sleep"
+                }
+            ]
+        }
+    ]
+}

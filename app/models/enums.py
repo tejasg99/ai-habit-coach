@@ -22,14 +22,17 @@ class DietaryPref(str, enum.Enum):
     vegetarian = "vegetarian"
     vegan = "vegan"
 
+
 class PlanStatus(str, enum.Enum):
     active = "active"
     archived = "archived"
+
 
 class PlanItemType(str, enum.Enum):
     workout = "workout"
     meal = "meal"
     habit = "habit"
+
 
 def enum_column(enum_cls: type[enum.Enum]) -> Enum:
     return Enum(
