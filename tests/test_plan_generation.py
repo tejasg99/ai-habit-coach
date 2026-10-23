@@ -106,3 +106,14 @@ def test_profile_is_passed_as_data_not_as_instructions():
     data = json.loads(user["content"])  # the user message is pure JSON data
     assert data["available_equipment"] == ["dumbbells", nasty]
     assert data["goal"] == "build_muscle"
+
+
+def test_items_per_day_boundary():
+    eight = make_plan()
+    eight["days"][0]["items"] = [make_item(title=f"Item {i}") for i in range(8)]
+    GeneratedPlan.model_validate(eight)  # 8 is allowed
+
+    nine = make_plan()
+    nine["days"][0]["items"] = [make_item(title=f"Item {i}") for i in range(9)]
+    with pytest.raises(ValidationError):
+        GeneratedPlan.model_validate(nine)  # 9 is not

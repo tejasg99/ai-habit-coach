@@ -1,3 +1,4 @@
+import re
 from datetime import datetime, time
 from typing import Annotated
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
@@ -15,10 +16,19 @@ def _validate_timezone(value: str) -> str:
     return value
 
 
+_EQUIPMENT_RE = re.compile(r"[a-z0-9][a-z0-9 \-]*")
+
+
 def _clean_equipment(items: list[str]) -> list[str]:
     cleaned = {item.strip().lower() for item in items if item.strip()}
-    if any(len(item) > 50 for item in cleaned):
-        raise ValueError("Equipment names must be 50 character or fewer")
+    for item in cleaned:
+        if len(item) > 50:
+            raise ValueError("Equipment names must be 50 characters or fewer")
+        if not _EQUIPMENT_RE.fullmatch(item):
+            raise ValueError(
+                "Equipment names may only contain letters, numbers, spaces and hyphens"
+            )
+
     return sorted(cleaned)
 
 
