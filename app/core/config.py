@@ -10,5 +10,9 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 30
 
+    LLM_API_KEY: str = ""
+    LLM_MODEL: str = ""
+    LLM_BASE_URL: str = "https://generativelanguage.googleapis.com/v1beta/openai/"
+
 
 settings = Settings()
