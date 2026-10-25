@@ -14,5 +14,8 @@ class Settings(BaseSettings):
     LLM_MODEL: str = ""
     LLM_BASE_URL: str = "https://generativelanguage.googleapis.com/v1beta/openai/"
 
+    LLM_TIMEOUT_SECONDS: float = 60.0
+    LLM_MAX_ATTEMPTS: int = 3
+
 
 settings = Settings()
