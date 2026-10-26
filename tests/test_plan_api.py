@@ -1,4 +1,4 @@
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 
 import pytest
 from sqlalchemy import select
@@ -194,3 +194,37 @@ def test_users_cannot_see_each_others_plans(client, headers, fake_llm, register)
     client.post("/plan/generate", headers=headers)
     other = bearer(register("bob@example.com"))
     assert client.get("/plan/today", headers=other).status_code == 404
+
+
+def test_week_is_404_without_a_plan(client, headers):
+    assert client.get("/plan/week", headers=headers).status_code == 404
+
+
+def test_week_returns_every_item_in_order(client, headers, fake_llm):
+    fake_llm.queue.append(valid_plan_text())
+    client.post("/plan/generate", headers=headers)
+    items = client.get("/plan/week", headers=headers).json()["items"]
+    assert len(items) == 14
+    order = [(i["day_of_week"], i["position"]) for i in items]
+    assert order == sorted(order)
+
+
+def test_week_is_private_to_each_user(client, headers, fake_llm, register):
+    fake_llm.queue.append(valid_plan_text())
+    client.post("/plan/generate", headers=headers)
+    assert client.get("/plan/week", headers=bearer(register("bob@example.com"))).status_code == 404
+
+
+def test_old_generations_do_not_count_against_the_limit(client, session_factory, headers, fake_llm):
+    fake_llm.queue.append(valid_plan_text())
+    assert client.post("/plan/generate", headers=headers).status_code == 201
+
+    with session_factory() as db:  # backdate the plan by two days, straight in the database
+        old = db.scalars(select(Plan)).one()
+        old.generated_at = datetime.now(timezone.utc) - timedelta(days=2)
+        db.commit()
+
+    fake_llm.queue.extend([valid_plan_text()] * MAX_GENERATIONS_PER_DAY)
+    for _ in range(MAX_GENERATIONS_PER_DAY):
+        assert client.post("/plan/generate", headers=headers).status_code == 201
+    assert client.post("/plan/generate", headers=headers).status_code == 429

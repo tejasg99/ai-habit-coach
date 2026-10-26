@@ -12,7 +12,7 @@ from app.services.plan_generator import (
     ProfileIncompleteError,
     generate_plan,
 )
-from app.services.plans import get_today
+from app.services.plans import get_active_plan, get_today
 
 router = APIRouter(prefix="/plan", tags=["plan"])
 
@@ -50,3 +50,11 @@ def today(user: CurrentUser, db: DbSession):
     if result is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "No active plan. Generate one first.")
     return result
+
+
+@router.get("/week", response_model=PlanRead)
+def week(user: CurrentUser, db: DbSession):
+    plan = get_active_plan(db, user.id)
+    if plan is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "No active plan. Generate one first.")
+    return plan
