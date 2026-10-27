@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, status
 
 from app.api.deps import CurrentUser
 from app.db.session import DbSession
-from app.schemas.plan import PlanRead, TodayRead
+from app.schemas.plan import PlanRead, TodayItemRead, TodayRead
 from app.services.llm_client import LLMError, LLMUnavailableError
 from app.services.plan_generator import (
     MAX_GENERATIONS_PER_DAY,
@@ -12,7 +12,7 @@ from app.services.plan_generator import (
     ProfileIncompleteError,
     generate_plan,
 )
-from app.services.plans import get_active_plan, get_today
+from app.services.plans import TodayView, get_active_plan, get_today
 
 router = APIRouter(prefix="/plan", tags=["plan"])
 
@@ -44,12 +44,29 @@ def generate(user: CurrentUser, db: DbSession):
         )
 
 
+def _today_response(view: TodayView) -> TodayRead:
+    items = []
+    for item in view.items:
+        log_id = view.log_ids.get(item.id)
+        items.append(
+            TodayItemRead.model_validate(item).model_copy(
+                update={"completed": log_id is not None, "log_id": log_id}
+            )
+        )
+    return TodayRead(
+        plan_id=view.plan_id,
+        local_date=view.local_date,
+        weekday=view.weekday,
+        items=items,
+    )
+
+
 @router.get("/today", response_model=TodayRead)
 def today(user: CurrentUser, db: DbSession):
-    result = get_today(db, user.id)
-    if result is None:
+    view = get_today(db, user.id)
+    if view is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "No active plan. Generate one first.")
-    return result
+    return _today_response(view)
 
 
 @router.get("/week", response_model=PlanRead)

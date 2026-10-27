@@ -27,10 +27,13 @@ class PlanRead(BaseModel):
     # raw_llm_response, prompt_version and llm_model are internal: not listed, so never exposed.
 
 
-class TodayRead(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
+class TodayItemRead(PlanItemRead):
+    completed: bool = False
+    log_id: int | None = None
 
+
+class TodayRead(BaseModel):
     plan_id: int
-    local_date: date  # the user's local date, not UTC
-    weekday: int  # 0 = Monday
-    items: list[PlanItemRead]
+    local_date: date
+    weekday: int
+    items: list[TodayItemRead]

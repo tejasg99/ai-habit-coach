@@ -10,6 +10,8 @@ os.environ["LLM_API_KEY"] = "test-key-not-real"
 os.environ["LLM_BASE_URL"] = "http://llm.invalid/v1"
 os.environ["LLM_MODEL"] = "test-model"
 
+from datetime import date
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
@@ -20,6 +22,31 @@ import app.models  # noqa: F401
 from app.db.base import Base
 from app.db.session import get_db
 from app.main import app
+from tests.helpers import bearer
+
+ONBOARDING = {
+    "goal": "build_muscle",
+    "fitness_level": "beginner",
+    "dietary_pref": "vegetarian",
+    "equipment": ["dumbbells"],
+    "timezone": "Asia/Kolkata",
+    "reminder_time": "19:30:00",
+}
+
+
+class FakeLLM:
+    """Stands in for chat_completion. Queue up replies (strings, or exceptions to raise)."""
+
+    def __init__(self):
+        self.queue = []
+        self.calls = 0
+
+    def __call__(self, messages, **kwargs):
+        self.calls += 1
+        item = self.queue.pop(0)
+        if isinstance(item, Exception):
+            raise item
+        return item
 
 
 @pytest.fixture()
@@ -58,3 +85,29 @@ def register(client):
         return res.json()
 
     return _register
+
+
+@pytest.fixture()
+def fake_llm(monkeypatch):
+    fake = FakeLLM()
+    # Patch the name where it is USED (plan_generator), not where it is defined.
+    monkeypatch.setattr("app.services.plan_generator.chat_completion", fake)
+    return fake
+
+
+@pytest.fixture()
+def headers(client, register):
+    """Auth headers for a user who has completed onboarding."""
+    h = bearer(register())
+    assert client.put("/onboarding/me", json=ONBOARDING, headers=h).status_code == 200
+    return h
+
+
+@pytest.fixture()
+def set_today(monkeypatch):
+    """Freeze 'today' for every feature at once, through the single place that decides it."""
+
+    def _set(day: date):
+        monkeypatch.setattr("app.services.plans.local_today", lambda tz, now=None: day)
+
+    return _set

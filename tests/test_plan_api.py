@@ -10,47 +10,6 @@ from app.services.plan_generator import MAX_GENERATIONS_PER_DAY, clean_json_text
 from app.services.plans import items_for_weekday, local_today
 from tests.helpers import bearer, valid_plan_text
 
-PROFILE = {
-    "goal": "build_muscle",
-    "fitness_level": "beginner",
-    "dietary_pref": "vegetarian",
-    "equipment": ["dumbbells"],
-    "timezone": "Asia/Kolkata",
-    "reminder_time": "19:30:00",
-}
-
-
-class FakeLLM:
-    """Stands in for chat_completion. Queue up replies (strings, or exceptions to raise)."""
-
-    def __init__(self):
-        self.queue = []
-        self.calls = 0
-
-    def __call__(self, messages, **kwargs):
-        self.calls += 1
-        item = self.queue.pop(0)
-        if isinstance(item, Exception):
-            raise item
-        return item
-
-
-@pytest.fixture()
-def fake_llm(monkeypatch):
-    fake = FakeLLM()
-    # Patch the name where it is USED (plan_generator), not where it is defined.
-    monkeypatch.setattr("app.services.plan_generator.chat_completion", fake)
-    return fake
-
-
-@pytest.fixture()
-def headers(client, register):
-    """Auth headers for a user who has completed onboarding."""
-    h = bearer(register())
-    assert client.put("/onboarding/me", json=PROFILE, headers=h).status_code == 200
-    return h
-
-
 # ---------- pure functions ----------
 
 
