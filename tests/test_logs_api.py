@@ -6,26 +6,11 @@ from sqlalchemy import func, select
 from app.models.log import Log
 from app.models.plan import Plan, PlanItem
 from app.services import logs as logs_service
-from tests.helpers import bearer, valid_plan_text
+from tests.helpers import bearer, log, today_items, valid_plan_text
 
 SATURDAY = date(2026, 10, 24)  # weekday 5
 SUNDAY = date(2026, 10, 25)  # weekday 6
 MONDAY = date(2026, 10, 26)  # weekday 0
-
-
-@pytest.fixture()
-def plan(client, headers, fake_llm):
-    """The user has a generated plan: 7 days x 2 items."""
-    fake_llm.queue.append(valid_plan_text())
-    assert client.post("/plan/generate", headers=headers).status_code == 201
-
-
-def today_items(client, headers):
-    return client.get("/plan/today", headers=headers).json()["items"]
-
-
-def log(client, headers, item_id, **extra):
-    return client.post("/logs", json={"plan_item_id": item_id, **extra}, headers=headers)
 
 
 def streak(client, headers):

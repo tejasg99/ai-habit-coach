@@ -30,10 +30,14 @@ def local_today(tz_name: str, now: datetime | None = None) -> date:
     return now.astimezone(ZoneInfo(tz_name)).date()
 
 
+def user_timezone(db: Session, user_id: int) -> str:
+    profile = get_profile(db, user_id)
+    return profile.timezone if profile else "UTC"
+
+
 def user_today(db: Session, user_id: int) -> date:
     """THE place that decides what 'today' means for a user. Everything else calls this."""
-    profile = get_profile(db, user_id)
-    return local_today(profile.timezone if profile else "UTC")
+    return local_today(user_timezone(db, user_id))
 
 
 def items_for_weekday(plan: Plan, weekday: int) -> list[PlanItem]:

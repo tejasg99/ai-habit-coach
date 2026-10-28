@@ -22,7 +22,7 @@ import app.models  # noqa: F401
 from app.db.base import Base
 from app.db.session import get_db
 from app.main import app
-from tests.helpers import bearer
+from tests.helpers import bearer, valid_plan_text
 
 ONBOARDING = {
     "goal": "build_muscle",
@@ -34,31 +34,21 @@ ONBOARDING = {
 }
 
 
-class FakeLLM:
-    """Stands in for chat_completion. Queue up replies (strings, or exceptions to raise)."""
-
-    def __init__(self):
-        self.queue = []
-        self.calls = 0
-
-    def __call__(self, messages, **kwargs):
-        self.calls += 1
-        item = self.queue.pop(0)
-        if isinstance(item, Exception):
-            raise item
-        return item
-
-
 @pytest.fixture()
-def session_factory():
-    """A brand-new in-memory database for EVERY test. Tests can open sessions from it
-    to inspect what was really saved."""
+def engine():
+    """A brand-new in-memory database for EVERY test."""
     engine = create_engine(
         "sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool
     )
     Base.metadata.create_all(engine)
-    yield sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)
+    yield engine
     engine.dispose()
+
+
+@pytest.fixture()
+def session_factory(engine):
+    """Tests can open sessions from this to inspect what was really saved."""
+    return sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)
 
 
 @pytest.fixture()
@@ -87,6 +77,21 @@ def register(client):
     return _register
 
 
+class FakeLLM:
+    """Stands in for chat_completion. Queue up replies (strings, or exceptions to raise)."""
+
+    def __init__(self):
+        self.queue = []
+        self.calls = 0
+
+    def __call__(self, messages, **kwargs):
+        self.calls += 1
+        item = self.queue.pop(0)
+        if isinstance(item, Exception):
+            raise item
+        return item
+
+
 @pytest.fixture()
 def fake_llm(monkeypatch):
     fake = FakeLLM()
@@ -111,3 +116,10 @@ def set_today(monkeypatch):
         monkeypatch.setattr("app.services.plans.local_today", lambda tz, now=None: day)
 
     return _set
+
+
+@pytest.fixture()
+def plan(client, headers, fake_llm):
+    """The user has a generated plan: 7 days x 2 items."""
+    fake_llm.queue.append(valid_plan_text())
+    assert client.post("/plan/generate", headers=headers).status_code == 201
