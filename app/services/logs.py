@@ -22,6 +22,10 @@ class LogNotFoundError(Exception):
     pass
 
 
+class LogNotEditableError(Exception):
+    """Only today's completions can be undone."""
+
+
 def _find_log(db: Session, user_id: int, plan_item_id: int, log_date: date) -> Log | None:
     return db.scalar(
         select(Log).where(
@@ -80,6 +84,8 @@ def log_completion(
 def delete_log(db: Session, user_id: int, log_id: int) -> None:
     log = db.scalar(select(Log).where(Log.id == log_id, Log.user_id == user_id))
     if log is None:
-        raise LogNotFoundError
+        raise LogNotFoundError  # ownership check first
+    if log.log_date != user_today(db, user_id):
+        raise LogNotEditableError
     db.delete(log)
     db.commit()

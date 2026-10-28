@@ -228,3 +228,20 @@ def test_deleting_the_account_removes_plans_and_logs(
     with session_factory() as db:
         for model in (Log, PlanItem, Plan):
             assert db.scalar(select(func.count()).select_from(model)) == 0
+
+
+def test_cannot_delete_a_log_from_a_previous_day(client, headers, plan, set_today):
+    set_today(SATURDAY)
+    log_id = log(client, headers, today_items(client, headers)[0]["id"]).json()["id"]
+    set_today(SUNDAY)
+    assert client.delete(f"/logs/{log_id}", headers=headers).status_code == 409
+    s = streak(client, headers)
+    assert s["current_streak"] == 1 and s["last_completed_date"] == "2026-10-24"
+
+
+def test_ownership_is_checked_before_the_date_rule(client, headers, plan, set_today, register):
+    set_today(SATURDAY)
+    log_id = log(client, headers, today_items(client, headers)[0]["id"]).json()["id"]
+    set_today(SUNDAY)
+    bob = bearer(register("bob@example.com"))
+    assert client.delete(f"/logs/{log_id}", headers=bob).status_code == 404  # not 409

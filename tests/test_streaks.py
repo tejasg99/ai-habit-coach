@@ -62,3 +62,8 @@ def test_a_log_dated_in_the_future_does_not_break_the_streak():
     info = compute_streak(days_ago(1, 0, -1), TODAY)  # timezone moved backwards
     assert info.current_streak == 3
     assert info.completed_today is False
+
+
+def test_a_single_missed_day_splits_the_run():
+    info = compute_streak(days_ago(0, 1, 3, 4), TODAY)  # day 2 is missing
+    assert (info.current_streak, info.longest_streak) == (2, 2)

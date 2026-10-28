@@ -5,6 +5,7 @@ from app.db.session import DbSession
 from app.schemas.log import LogCreate, LogRead
 from app.services.logs import (
     ItemNotScheduledTodayError,
+    LogNotEditableError,
     LogNotFoundError,
     PlanItemNotFoundError,
     delete_log,
@@ -33,3 +34,5 @@ def remove_log(log_id: int, user: CurrentUser, db: DbSession):
         delete_log(db, user.id, log_id)
     except LogNotFoundError:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Log not found")
+    except LogNotEditableError:
+        raise HTTPException(status.HTTP_409_CONFLICT, "Only today's completions can be undone")
