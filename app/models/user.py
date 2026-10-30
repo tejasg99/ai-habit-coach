@@ -10,6 +10,8 @@ if TYPE_CHECKING:
     from app.models.log import Log
     from app.models.plan import Plan
     from app.models.profile import Profile
+    from app.models.push_token import PushToken
+    from app.models.reminder_send import ReminderSend
 
 
 class User(Base):
@@ -30,3 +32,11 @@ class User(Base):
 
     plans: Mapped[list["Plan"]] = relationship(back_populates="user", cascade="all, delete-orphan")
     logs: Mapped[list["Log"]] = relationship(back_populates="user", cascade="all, delete-orphan")
+
+    push_tokens: Mapped[list["PushToken"]] = relationship(
+        back_populates="user", cascade="all, delete-orphan"
+    )
+    
+    reminder_sends: Mapped[list["ReminderSend"]] = relationship(
+        back_populates="user", cascade="all, delete-orphan"
+    )

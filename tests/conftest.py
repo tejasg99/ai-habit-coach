@@ -10,6 +10,10 @@ os.environ["LLM_API_KEY"] = "test-key-not-real"
 os.environ["LLM_BASE_URL"] = "http://llm.invalid/v1"
 os.environ["LLM_MODEL"] = "test-model"
 
+os.environ["EXPO_PUSH_URL"] = "http://expo.invalid/push"  # real pushes impossible in tests
+os.environ["EXPO_ACCESS_TOKEN"] = ""
+os.environ["SCHEDULER_ENABLED"] = "false"  # a dev's .env must never start a scheduler in tests
+
 from datetime import date
 
 import pytest
