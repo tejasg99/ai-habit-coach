@@ -14,8 +14,6 @@ class PushToken(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
     # Unique: one physical device has one token, and belongs to one account at a time.
     token: Mapped[str] = mapped_column(String(255), unique=True)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now()
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     user: Mapped[User] = relationship(back_populates="push_tokens")

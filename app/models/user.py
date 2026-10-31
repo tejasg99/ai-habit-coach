@@ -36,7 +36,7 @@ class User(Base):
     push_tokens: Mapped[list["PushToken"]] = relationship(
         back_populates="user", cascade="all, delete-orphan"
     )
-    
+
     reminder_sends: Mapped[list["ReminderSend"]] = relationship(
         back_populates="user", cascade="all, delete-orphan"
     )
