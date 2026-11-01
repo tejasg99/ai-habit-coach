@@ -7,7 +7,13 @@ from app.models.profile import Profile
 from app.models.push_token import PushToken
 from app.models.reminder_send import ReminderSend
 from app.services.expo_push import PushError, PushResult, PushUnavailableError
-from app.services.reminders import build_reminder, reminder_local_date, run_reminder_sweep
+from app.services.reminders import (
+    SweepStats,
+    _process_user,
+    build_reminder,
+    reminder_local_date,
+    run_reminder_sweep,
+)
 from app.services.streaks import StreakInfo
 from tests.helpers import bearer, log, today_items, valid_plan_text
 
@@ -274,3 +280,38 @@ def test_a_corrupt_profile_does_not_stop_the_sweep(session_factory, alice, add_u
         db.commit()
     stats = sweep(session_factory, FakeSender())
     assert (stats.due, stats.sent) == (1, 1)
+
+
+def test_disabled_users_are_not_considered(client, session_factory, alice):
+    res = client.patch("/onboarding/me", json={"reminders_enabled": False}, headers=alice)
+    assert res.status_code == 200 and res.json()["reminders_enabled"] is False
+    sender = FakeSender()
+    assert sweep(session_factory, sender).considered == 0
+    assert sender.calls == []
+
+
+def test_reminders_can_be_switched_back_on(client, session_factory, alice):
+    client.patch("/onboarding/me", json={"reminders_enabled": False}, headers=alice)
+    client.patch("/onboarding/me", json={"reminders_enabled": True}, headers=alice)
+    assert sweep(session_factory, FakeSender()).sent == 1
+
+
+def test_put_without_the_field_turns_reminders_back_on(client, session_factory, alice):
+    client.patch("/onboarding/me", json={"reminders_enabled": False}, headers=alice)
+    assert client.put("/onboarding/me", json=ALICE_PROFILE, headers=alice).status_code == 200
+    assert client.get("/onboarding/me", headers=alice).json()["reminders_enabled"] is True
+
+
+def test_losing_the_claim_race_skips_without_sending(session_factory, alice):
+    with session_factory() as db:
+        user_id = db.scalar(select(Profile.user_id))
+        db.add(ReminderSend(user_id=user_id, local_date=SATURDAY))
+        db.commit()  # "another sweep" claimed it first
+
+        sender, stats = FakeSender(), SweepStats()
+        _process_user(db, user_id, SATURDAY, sender, stats)
+
+        assert (stats.skipped, sender.calls) == (1, [])
+        assert (
+            db.scalar(select(func.count()).select_from(ReminderSend)) == 1
+        )  # session still usable

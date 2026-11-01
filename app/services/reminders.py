@@ -167,6 +167,7 @@ def run_reminder_sweep(db: Session, now: datetime, sender: Sender = send_push) -
     profiles = db.scalars(
         select(Profile).where(
             Profile.onboarding_complete.is_(True),
+            Profile.reminders_enabled.is_(True),
             exists().where(PushToken.user_id == Profile.user_id),
         )
     ).all()

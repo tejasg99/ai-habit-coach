@@ -46,6 +46,7 @@ class ProfileIn(BaseModel):
     equipment: Equipment = Field(default_factory=list)
     timezone: Timezone = "UTC"
     reminder_time: time = time(20, 0)  # in the user's local time
+    reminders_enabled: bool = True
 
 
 class ProfileUpdate(BaseModel):
@@ -57,6 +58,7 @@ class ProfileUpdate(BaseModel):
     equipment: Equipment | None = None
     timezone: Timezone | None = None
     reminder_time: time | None = None
+    reminders_enabled: bool | None = None
 
 
 class ProfileRead(ProfileIn):

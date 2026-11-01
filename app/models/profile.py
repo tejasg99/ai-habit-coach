@@ -1,6 +1,6 @@
 from datetime import datetime, time
 
-from sqlalchemy import JSON, DateTime, ForeignKey, String, Time, func
+from sqlalchemy import JSON, DateTime, ForeignKey, String, Time, func, true
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -23,6 +23,7 @@ class Profile(Base):
 
     timezone: Mapped[str] = mapped_column(String(64), default="UTC")
     reminder_time: Mapped[time] = mapped_column(Time, default=time(20, 0))
+    reminders_enabled: Mapped[bool] = mapped_column(default=True, server_default=true())
 
     onboarding_complete: Mapped[bool] = mapped_column(default=False)
     updated_at: Mapped[datetime] = mapped_column(
