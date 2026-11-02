@@ -1,15 +1,57 @@
-   name: CI
-   on: [push, pull_request]
-   jobs:
-     test:
-       runs-on: ubuntu-latest
-       steps:
-         - uses: actions/checkout@v4
-         - uses: actions/setup-python@v5
-           with:
-             python-version: "3.12"
-             cache: pip
-         - run: pip install -r requirements-dev.txt
-         - run: ruff check .
-         - run: ruff format --check .
-         - run: pytest -q
+name: CI
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements-dev.txt
+      - run: ruff check .
+      - run: ruff format --check .
+      - run: pytest -q
+
+  migrations:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: habit
+          POSTGRES_PASSWORD: docpgpass9
+          POSTGRES_DB: habitcoach
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd "pg_isready -U habit -d habitcoach"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql+psycopg://habit:docpgpass9@localhost:5432/habitcoach
+      SECRET_KEY: ci-only-secret-key-that-is-long-enough-1234567890
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Migrate a real Postgres from scratch
+        run: alembic upgrade head
+      - name: Models and migrations must agree
+        run: alembic check
+      - name: Every migration must be reversible
+        run: |
+          alembic downgrade base
+          alembic upgrade head
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t habit-api .

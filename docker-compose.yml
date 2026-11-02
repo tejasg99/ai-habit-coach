@@ -2,13 +2,31 @@ services:
   db:
     image: postgres:16
     environment:
-      POSTGRES_USER: ${DB_USER:-habit}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME:-habitcoach}
+      POSTGRES_USER: habit
+      POSTGRES_PASSWORD: docpgpass9
+      POSTGRES_DB: habitcoach
     ports:
       - "5433:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U habit -d habitcoach"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build: .
+    env_file: .env
+    environment:
+      # Inside the compose network, the database host is the service name, not localhost.
+      DATABASE_URL: postgresql+psycopg://habit:docpgpass9@db:5432/habitcoach
+      SCHEDULER_ENABLED: "false"
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
 
 volumes:
   pgdata:
