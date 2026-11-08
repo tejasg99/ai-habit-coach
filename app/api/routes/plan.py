@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException, status
 
 from app.api.deps import CurrentUser
 from app.db.session import DbSession
+from app.schemas.errors import ErrorDetail
 from app.schemas.plan import PlanRead, TodayItemRead, TodayRead
 from app.services.llm_client import LLMError, LLMUnavailableError
 from app.services.plan_generator import (
@@ -17,8 +18,21 @@ from app.services.plans import TodayView, get_active_plan, get_today
 router = APIRouter(prefix="/plan", tags=["plan"])
 
 
-@router.post("/generate", response_model=PlanRead, status_code=status.HTTP_201_CREATED)
-def generate(user: CurrentUser, db: DbSession):
+@router.post(
+    "/generate",
+    response_model=PlanRead,
+    status_code=status.HTTP_201_CREATED,
+    responses={
+        409: {
+            "model": ErrorDetail,
+            "description": "Onboarding incomplete, or another generation just finished",
+        },
+        429: {"model": ErrorDetail, "description": "Daily generation limit reached"},
+        502: {"model": ErrorDetail, "description": "The model never produced a valid plan"},
+        503: {"model": ErrorDetail, "description": "Generator temporarily busy (see Retry-After)"},
+    },
+)
+def generate_weekly_plan(user: CurrentUser, db: DbSession):
     try:
         return generate_plan(db, user.id)
     except ProfileIncompleteError:
@@ -62,7 +76,7 @@ def _today_response(view: TodayView) -> TodayRead:
 
 
 @router.get("/today", response_model=TodayRead)
-def today(user: CurrentUser, db: DbSession):
+def get_today_plan(user: CurrentUser, db: DbSession):
     view = get_today(db, user.id)
     if view is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "No active plan. Generate one first.")
@@ -70,7 +84,7 @@ def today(user: CurrentUser, db: DbSession):
 
 
 @router.get("/week", response_model=PlanRead)
-def week(user: CurrentUser, db: DbSession):
+def get_week_plan(user: CurrentUser, db: DbSession):
     plan = get_active_plan(db, user.id)
     if plan is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "No active plan. Generate one first.")

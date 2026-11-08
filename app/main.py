@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.routing import APIRoute
 
 import app.models  # noqa: F401 - for linters to not to raise an error as this import is unused but needed
 from app.api.routes import auth, health, logs, notifications, onboarding, plan, progress, users
@@ -22,7 +23,16 @@ async def lifespan(app: FastAPI):
         scheduler.shutdown(wait=False)
 
 
-app = FastAPI(title="AI habit coach API", version="0.1.0", lifespan=lifespan)
+def operation_id(route: APIRoute) -> str:
+    return route.name  # the Python function name: readable, and unique (a test checks)
+
+
+app = FastAPI(
+    title="AI Habit Coach API",
+    version="0.1.0",
+    lifespan=lifespan,
+    generate_unique_id_function=operation_id,
+)
 
 app.include_router(health.router)
 app.include_router(auth.router)

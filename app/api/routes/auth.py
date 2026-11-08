@@ -13,6 +13,13 @@ from app.core.security import (
 from app.db.session import DbSession
 from app.schemas.token import RefreshRequest, TokenPair
 from app.schemas.user import UserCreate, UserRead
+from app.services.login_throttle import (
+    RETRY_AFTER_SECONDS,
+    LoginThrottledError,
+    clear_login_failures,
+    ensure_login_allowed,
+    record_login_failure,
+)
 from app.services.users import (
     EmailAlreadyRegisteredError,
     authenticate_user,
@@ -40,18 +47,29 @@ def signup(payload: UserCreate, db: DbSession):
 
 @router.post("/login", response_model=TokenPair)
 def login(form: Annotated[OAuth2PasswordRequestForm, Depends()], db: DbSession):
+    try:
+        ensure_login_allowed(db, form.username)  # before any password hashing
+    except LoginThrottledError:
+        raise HTTPException(
+            status.HTTP_429_TOO_MANY_REQUESTS,
+            "Too many failed login attempts. Try again later.",
+            headers={"Retry-After": str(RETRY_AFTER_SECONDS)},
+        )
+
     user = authenticate_user(db, form.username, form.password)
     if user is None:
+        record_login_failure(db, form.username)
         raise HTTPException(
             status.HTTP_401_UNAUTHORIZED,
             "Incorrect email or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
+    clear_login_failures(db, form.username)
     return _issue_tokens(user.id)
 
 
 @router.post("/refresh", response_model=TokenPair)
-def refresh(body: RefreshRequest, db: DbSession):
+def refresh_tokens(body: RefreshRequest, db: DbSession):
     try:
         user_id = decode_token(body.refresh_token, expected_type=REFRESH)
     except TokenError:

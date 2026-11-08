@@ -9,10 +9,10 @@ router = APIRouter(prefix="/notifications", tags=["notifications"])
 
 
 @router.post("/register-token", status_code=status.HTTP_204_NO_CONTENT)
-def register(payload: PushTokenIn, user: CurrentUser, db: DbSession):
+def register_push_token(payload: PushTokenIn, user: CurrentUser, db: DbSession):
     register_token(db, user.id, payload.token)
 
 
 @router.post("/unregister-token", status_code=status.HTTP_204_NO_CONTENT)
-def unregister(payload: PushTokenIn, user: CurrentUser, db: DbSession):
+def unregister_push_token(payload: PushTokenIn, user: CurrentUser, db: DbSession):
     unregister_token(db, user.id, payload.token)
