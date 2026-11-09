@@ -7,6 +7,7 @@ import app.models  # noqa: F401 - for linters to not to raise an error as this i
 from app.api.routes import auth, health, logs, notifications, onboarding, plan, progress, users
 from app.core.config import settings
 from app.core.logging import configure_logging
+from app.core.middleware import request_context_middleware
 
 configure_logging()
 
@@ -34,6 +35,7 @@ app = FastAPI(
     generate_unique_id_function=operation_id,
 )
 
+app.middleware("http")(request_context_middleware)
 app.include_router(health.router)
 app.include_router(auth.router)
 app.include_router(users.router)

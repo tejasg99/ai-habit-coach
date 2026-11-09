@@ -18,6 +18,7 @@ A REST API for a mobile habit and fitness app. A user completes a short onboardi
 - Streaks derived from logs, and per-day progress for charts (planned vs completed)
 - Push reminders (Expo) at the user's local time, sent only if they haven't started the day; users can opt out
 - Account deletion that removes all of a user's data
+- Login throttling: 5 failed attempts per email within 15 minutes pauses further attempts (HTTP 429 with Retry-After)
 
 ## Architecture
 
@@ -48,7 +49,7 @@ flowchart LR
 | Method | Path | Purpose | Auth |
 |---|---|---|---|
 | POST | `/auth/signup` | Create an account | No |
-| POST | `/auth/login` | Log in (form-encoded; email goes in `username`) | No |
+| POST | `/auth/login` | Log in (form-encoded; email goes in `username`; throttled after repeated failures) | No |
 | POST | `/auth/refresh` | Exchange a refresh token for a new token pair | No |
 | GET / PATCH / DELETE | `/users/me` | Read, update or delete the account | Yes |
 | PUT / GET / PATCH | `/onboarding/me` | Create, read or update the profile | Yes |
@@ -71,6 +72,10 @@ flowchart LR
 8. **Reminders that tolerate unreliable schedulers.** A sweep finds users inside their local reminder window and claims the day in a ledger before sending. Late, repeated or overlapping runs cannot send duplicates, and dead device tokens are pruned automatically.
 9. **Fail fast on configuration.** Typed settings, production guards (for example, a short secret key refuses to start), and no secrets in the image or the repository.
 10. **Tests at the boundaries.** The LLM and Expo are replaced by fakes, each test gets a fresh in-memory database, and CI separately applies every migration to a real PostgreSQL, checks that models and migrations agree, and builds the Docker image.
+11. **Throttling with stated trade-offs.** Failed logins are counted per email, including emails that don't exist (no account enumeration), and blocked attempts are not counted (no permanent lockout). There is deliberately no IP-based limit: behind a proxy the client IP is spoofable, so that belongs at the network edge.
+12. **Reproducible, audited dependencies.** `requirements.in` lists what I chose; `requirements.txt` is a generated lock with every package pinned for all platforms; CI audits the pins for known vulnerabilities.
+13. **A committed API contract.** `docs/openapi.json` is exported from the app and checked by a test, so any change to the API's shape fails CI until it is regenerated and reviewed. This keeps the mobile client from breaking silently.
+14. **Traceable requests.** Every request gets an ID returned in X-Request-ID and attached to every log line, and tests assert that credentials never reach the logs.
 
 ## Quick tour
 
@@ -113,6 +118,17 @@ If port 5432 is already taken on your machine, change the left side of the `port
 
 To run the whole stack in containers instead: `docker compose up --build api`.
 
+### Managing dependencies
+
+Edit `requirements.in` (runtime) or `requirements-dev.in` (tools), then regenerate the locks. Never edit the `.txt` files by hand.
+
+```bash
+uv pip compile requirements.in -o requirements.txt --universal --python-version 3.12
+uv pip compile requirements-dev.in -o requirements-dev.txt --universal --python-version 3.12
+```
+
+Add `--upgrade` to move every package to its newest allowed version (run the tests afterwards).
+
 ## Configuration
 
 All configuration comes from environment variables (see `.env.example`).
@@ -135,7 +151,7 @@ pytest                                  # no database needed: in-memory SQLite
 ruff check . && ruff format --check .
 ```
 
-GitHub Actions runs three jobs on every push: tests and linting; migrations against a real PostgreSQL (upgrade, check that models and migrations agree, full downgrade and upgrade again); and a Docker image build.
+GitHub Actions runs four jobs on every push: tests and linting; migrations against a real PostgreSQL (upgrade, check that models and migrations agree, full downgrade and upgrade); a Docker image build; and a dependency vulnerability audit. A contract test fails if the OpenAPI document changes without the committed snapshot being regenerated (python -m scripts.export_openapi).
 
 ## Deployment
 
@@ -148,4 +164,4 @@ GitHub Actions runs three jobs on every push: tests and linting; migrations agai
 - Plan generation is synchronous and can take a while. A production version would return `202 Accepted` and let the app poll a status endpoint.
 - Push tickets are handled, but delivery receipts are not yet polled to prune tokens that die after acceptance.
 - Free-tier cold starts (see the note at the top).
-- Planned next: login throttling, a locked and audited dependency set, and a committed OpenAPI contract for the mobile app.
+- Planned next: push delivery-receipt handling, asynchronous plan generation, and the React Native client.
