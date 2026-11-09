@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException, status
 
 from app.api.deps import CurrentUser
 from app.db.session import DbSession
+from app.schemas.errors import ErrorDetail
 from app.schemas.profile import ProfileIn, ProfileRead, ProfileUpdate
 from app.services.profiles import (
     ProfileNotFoundError,
@@ -18,7 +19,11 @@ def save_my_profile(payload: ProfileIn, user: CurrentUser, db: DbSession):
     return save_profile(db, user.id, payload.model_dump())
 
 
-@router.get("/me", response_model=ProfileRead)
+@router.get(
+    "/me",
+    response_model=ProfileRead,
+    responses={404: {"model": ErrorDetail, "description": "Onboarding not completed"}},
+)
 def read_my_profile(user: CurrentUser, db: DbSession):
     profile = get_profile(db, user.id)
     if profile is None:

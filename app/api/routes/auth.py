@@ -11,6 +11,7 @@ from app.core.security import (
     decode_token,
 )
 from app.db.session import DbSession
+from app.schemas.errors import ErrorDetail
 from app.schemas.token import RefreshRequest, TokenPair
 from app.schemas.user import UserCreate, UserRead
 from app.services.login_throttle import (
@@ -45,7 +46,14 @@ def signup(payload: UserCreate, db: DbSession):
         raise HTTPException(status.HTTP_409_CONFLICT, "Email already registered")
 
 
-@router.post("/login", response_model=TokenPair)
+@router.post(
+    "/login",
+    response_model=TokenPair,
+    responses={
+        401: {"model": ErrorDetail, "description": "Incorrect email or password"},
+        429: {"model": ErrorDetail, "description": "Too many failed attempts (see Retry-After)"},
+    },
+)
 def login(form: Annotated[OAuth2PasswordRequestForm, Depends()], db: DbSession):
     try:
         ensure_login_allowed(db, form.username)  # before any password hashing
