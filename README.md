@@ -80,7 +80,7 @@ flowchart LR
 ## Quick tour
 
 ```bash
-BASE=https://<your-service>.onrender.com
+BASE=https://ai-habit-coach-6vmk.onrender.com
 
 # Sign up, then log in (login is form-encoded)
 curl -X POST $BASE/auth/signup -H "Content-Type: application/json" \
@@ -101,8 +101,8 @@ curl $BASE/plan/today -H "Authorization: Bearer $TOKEN"
 ## Run locally
 
 ```bash
-git clone https://github.com/<your-username>/<your-repo>.git
-cd <your-repo>
+git clone https://github.com/tejasg99/ai-habit-coach.git
+cd ai-habit-coach
 
 python -m venv .venv
 source .venv/bin/activate          # Windows Git Bash: source .venv/Scripts/activate
